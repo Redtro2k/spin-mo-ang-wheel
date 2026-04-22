@@ -90,9 +90,9 @@
         }
 
         .shell {
-            width: min(100%, 980px);
+            width: min(100%, 1180px);
             display: grid;
-            grid-template-columns: minmax(290px, 1.05fr) minmax(290px, 0.95fr);
+            grid-template-columns: minmax(280px, 0.9fr) minmax(380px, 1.1fr);
             gap: 28px;
             align-items: center;
         }
@@ -162,7 +162,7 @@
 
         .wheel-panel {
             position: relative;
-            padding: 30px 22px 24px;
+            padding: 34px 26px 28px;
             border-radius: 38px;
             background:
                 linear-gradient(180deg, rgba(255, 252, 253, 0.94), rgba(255, 240, 245, 0.88));
@@ -192,7 +192,7 @@
 
         .wheel-container {
             position: relative;
-            width: min(74vw, 430px);
+            width: min(calc(100% - 8px), 680px);
             aspect-ratio: 1;
             margin: 0 auto 18px;
             filter: drop-shadow(0 18px 30px rgba(142, 59, 104, 0.18));
@@ -499,7 +499,7 @@
             }
 
             .wheel-container {
-                width: min(88vw, 390px);
+                width: min(calc(100% - 8px), 500px);
             }
 
             #spinBtn {
@@ -564,7 +564,7 @@
                     <div class="wheel-ring"></div>
                     <div class="pointer"></div>
                     <div class="canvas-wrap">
-                        <canvas id="wheelCanvas" width="800" height="800"></canvas>
+                        <canvas id="wheelCanvas" width="1000" height="1000"></canvas>
                     </div>
                     <button id="spinBtn" type="button">SPIN</button>
                 </div>
@@ -600,20 +600,21 @@
         const modalResult = document.getElementById("modalResult");
         const modalNote = document.getElementById("modalNote");
         const closeModalBtn = document.getElementById("closeModal");
+        const maxSpins = 5;
 
         const items = [
-            "Sweet message",
-            "Sweet paragraph",
-            "Voice lambing",
-            "Voice poem",
-            "Make a song",
-            "Send cute pic (optional)",
-            "Mystery gift",
-            "Simple wish",
-            "Talk about our future date",
-            "Ikaw bahala, love",
-            "I will send you a voice note",
-            "I will send a sweet message"
+            "You must ask me 1 deep question",
+            "What scares you in our relationship?",
+            "One thing you appreciate about me",
+            "Send me your current selfie (no filter 😆)",
+            "Describe us using Emoji",
+            "🎁 Jackpot: I'll do anything you want (wholesome 😆)",
+            "Make a title for our love story",
+            "send voice message na pa Baby",
+            "Ano yung ideal relationship mo?",
+            "Ano yung gusto mong mas ginagawa ko para sayo?",
+            "Sa tingin mo, ano yung kailangan pa nating i-improve?",
+            "Sa tingin mo, ano yung weakness mo sa relationship?"
         ];
 
         const sliceGradients = [
@@ -629,6 +630,15 @@
         const sliceAngle = (2 * Math.PI) / numSlices;
         let currentRotation = 0;
         let isSpinning = false;
+
+        function getSpinCount() {
+            const saved = Number(localStorage.getItem("spinCount") || "0");
+            return Number.isFinite(saved) ? saved : 0;
+        }
+
+        function getRemainingSpins() {
+            return Math.max(0, maxSpins - getSpinCount());
+        }
 
         function drawWheel() {
             const radius = canvas.width / 2;
@@ -660,8 +670,8 @@
                 ctx.textAlign = "right";
                 ctx.textBaseline = "middle";
                 ctx.fillStyle = "#57283c";
-                ctx.font = "bold 25px 'Trebuchet MS', sans-serif";
-                wrapText(items[i], radius - 62, 0, 180, 28);
+                ctx.font = "bold 22px 'Trebuchet MS', sans-serif";
+                wrapText(items[i], radius - 72, 0, 240, 24);
                 ctx.restore();
             }
 
@@ -726,8 +736,28 @@
             spinBtn.disabled = false;
             spinBtn.textContent = "SPIN";
             wheelPanel.classList.remove("spinning");
-            updateStatus("Today already chosen", "Come back tomorrow for another romantic pick.");
+            const spinCount = getSpinCount() + 1;
+            localStorage.setItem("spinCount", String(spinCount));
+            const remaining = Math.max(0, maxSpins - spinCount);
+
+            if (remaining === 0) {
+                spinBtn.disabled = true;
+                updateStatus("No spins left", "You reached the 5-spin limit.");
+            } else {
+                updateStatus("Spin used", `${remaining} spin${remaining === 1 ? "" : "s"} left.`);
+            }
+
             showModal(result, true);
+        }
+
+        function initializeSpinState() {
+            const remaining = getRemainingSpins();
+            if (remaining === 0) {
+                spinBtn.disabled = true;
+                updateStatus("No spins left", "You reached the 5-spin limit.");
+            } else {
+                updateStatus("Ready to spin", `${remaining} spin${remaining === 1 ? "" : "s"} available.`);
+            }
         }
 
         spinBtn.addEventListener("click", () => {
@@ -735,12 +765,10 @@
                 return;
             }
 
-            const today = new Date().toDateString();
-            const lastSpinDate = localStorage.getItem("lastSpinDate");
-
-            if (lastSpinDate === today) {
-                updateStatus("Already spun today", "You used today's chance already, love.");
-                showModal("You already spun today, love.", false);
+            const remainingBeforeSpin = getRemainingSpins();
+            if (remainingBeforeSpin <= 0) {
+                updateStatus("No spins left", "You reached the 5-spin limit.");
+                showModal("You already used all 5 spins.", false);
                 return;
             }
 
@@ -764,7 +792,6 @@
             canvas.style.transform = `rotate(${currentRotation}deg)`;
 
             window.setTimeout(() => {
-                localStorage.setItem("lastSpinDate", today);
                 finishSpin(items[targetSlice]);
             }, 4800);
         });
@@ -782,6 +809,7 @@
         });
 
         drawWheel();
+        initializeSpinState();
     </script>
 </body>
 </html>
