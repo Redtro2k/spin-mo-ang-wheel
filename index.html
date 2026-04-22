@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Comfort</title>
+    <style>
+        :root {
+            --bg-rose: #fff1f5;
+            --bg-peach: #ffe3d8;
+            --bg-blush: #f8d6e7;
+            --bg-berry: #8e3b68;
+            --bg-wine: #58233f;
+            --accent-gold: #ffd9a0;
+            --text-main: #4a2141;
+            --text-soft: #7a4a67;
+            --panel: rgba(255, 251, 253, 0.68);
+            --panel-strong: rgba(255, 247, 250, 0.9);
+            --shadow: 0 28px 60px rgba(103, 33, 70, 0.18);
+            --ring: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Trebuchet MS", "Gill Sans", sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 30%),
+                radial-gradient(circle at 80% 20%, rgba(255, 217, 160, 0.35), transparent 22%),
+                linear-gradient(135deg, var(--bg-rose) 0%, var(--bg-peach) 38%, var(--bg-blush) 68%, #f5bfd8 100%);
+        }
+
+        .scene {
+            position: relative;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 28px 16px;
+            isolation: isolate;
+        }
+
+        .scene::before,
+        .scene::after {
+            content: "";
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            filter: blur(18px);
+            opacity: 0.55;
+            z-index: -2;
+            animation: floatBlob 14s ease-in-out infinite;
+        }
+
+        .scene::before {
+            top: -140px;
+            left: -90px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 198, 222, 0.24));
+        }
+
+        .scene::after {
+            right: -120px;
+            bottom: -160px;
+            background: radial-gradient(circle, rgba(255, 230, 236, 0.88), rgba(163, 56, 101, 0.18));
+            animation-delay: -6s;
+        }
+
+        .hearts {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            color: rgba(255, 255, 255, 0.68);
+            font-size: clamp(18px, 2vw, 28px);
+            animation: driftUp linear infinite;
+            text-shadow: 0 8px 18px rgba(142, 59, 104, 0.14);
+        }
+
+        .shell {
+            width: min(100%, 1180px);
+            display: grid;
+            grid-template-columns: minmax(280px, 0.9fr) minmax(380px, 1.1fr);
+            gap: 28px;
+            align-items: center;
+        }
+
+        .hero {
+            padding: 36px 32px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            background: linear-gradient(180deg, rgba(255, 252, 254, 0.82), rgba(255, 242, 247, 0.62));
+            backdrop-filter: blur(18px);
+            border-radius: 34px;
+            box-shadow: var(--shadow);
+            animation: riseIn 0.9s ease both;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.56);
+            color: var(--text-soft);
+            font-size: 0.84rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .title {
+            font-family: "Palatino Linotype", "Book Antiqua", serif;
+            font-size: clamp(2.6rem, 5vw, 4.8rem);
+            line-height: 0.94;
+            margin-bottom: 16px;
+            color: var(--bg-wine);
+        }
+
+        .title span {
+            display: block;
+            color: #a23865;
+            font-size: 0.62em;
+            letter-spacing: 0.06em;
+            margin-top: 10px;
+        }
+
+        .lead {
+            font-size: 1.02rem;
+            line-height: 1.75;
+            color: var(--text-soft);
+            max-width: 34ch;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .chip {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.65);
+            color: var(--text-main);
+            font-size: 0.93rem;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+
+        .wheel-panel {
+            position: relative;
+            padding: 34px 26px 28px;
+            border-radius: 38px;
+            background:
+                linear-gradient(180deg, rgba(255, 252, 253, 0.94), rgba(255, 240, 245, 0.88));
+            border: 1px solid rgba(255, 255, 255, 0.76);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            animation: riseIn 1s ease 0.12s both;
+        }
+
+        .wheel-head {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .wheel-head h2 {
+            font-family: "Palatino Linotype", "Book Antiqua", serif;
+            font-size: 1.65rem;
+            margin-bottom: 6px;
+            color: var(--bg-wine);
+        }
+
+        .wheel-head p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: min(calc(100% - 8px), 680px);
+            aspect-ratio: 1;
+            margin: 0 auto 18px;
+            filter: drop-shadow(0 18px 30px rgba(142, 59, 104, 0.18));
+        }
+
+        .wheel-ring {
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 218, 230, 0.86));
+            box-shadow:
+                inset 0 0 0 3px rgba(255, 255, 255, 0.78),
+                inset 0 0 0 12px rgba(255, 240, 245, 0.78),
+                0 16px 26px rgba(128, 34, 84, 0.18);
+            z-index: 0;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 24px solid transparent;
+            border-right: 24px solid transparent;
+            border-top: 42px solid #ff8cb2;
+            z-index: 20;
+            filter: drop-shadow(0 10px 10px rgba(128, 34, 84, 0.22));
+        }
+
+        .pointer::after {
+            content: "";
+            position: absolute;
+            left: -7px;
+            top: -40px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.55);
+        }
+
+        .canvas-wrap {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            will-change: transform;
+        }
+
+        #spinBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 104px;
+            height: 104px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(160deg, #fffefb 0%, #fff0f6 40%, #ffc6da 100%);
+            color: var(--bg-wine);
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            box-shadow:
+                inset 0 2px 0 rgba(255, 255, 255, 0.92),
+                0 12px 24px rgba(128, 34, 84, 0.22);
+            z-index: 15;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            outline: none;
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        #spinBtn:hover {
+            transform: translate(-50%, -50%) scale(1.04);
+            box-shadow:
+                inset 0 2px 0 rgba(255, 255, 255, 0.92),
+                0 18px 28px rgba(128, 34, 84, 0.24);
+            filter: saturate(1.05);
+        }
+
+        #spinBtn:active {
+            transform: translate(-50%, -50%) scale(0.96);
+        }
+
+        #spinBtn:disabled {
+            cursor: wait;
+            opacity: 0.86;
+            animation: none;
+        }
+
+        .status-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.62);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+        }
+
+        .status-copy strong {
+            display: block;
+            font-size: 0.98rem;
+            margin-bottom: 4px;
+            color: var(--bg-wine);
+        }
+
+        .status-copy span {
+            display: block;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-soft);
+        }
+
+        .status-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #ff95bc, #ff5f92);
+            box-shadow: 0 0 0 8px rgba(255, 149, 188, 0.18);
+            flex-shrink: 0;
+        }
+
+        .wheel-panel.spinning .pointer {
+            animation: tick 0.12s linear infinite;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(86, 22, 56, 0.32);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            width: min(100%, 380px);
+            padding: 34px 28px 28px;
+            border-radius: 28px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255, 253, 254, 0.97), rgba(255, 241, 247, 0.94));
+            box-shadow: 0 24px 55px rgba(67, 19, 47, 0.28);
+            transform: translateY(18px) scale(0.95);
+            transition: transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-kicker {
+            display: inline-block;
+            margin-bottom: 14px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 216, 228, 0.85);
+            color: #a23865;
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        #modalResult {
+            font-family: "Palatino Linotype", "Book Antiqua", serif;
+            font-size: 1.7rem;
+            line-height: 1.3;
+            color: var(--bg-wine);
+            margin-bottom: 10px;
+        }
+
+        .note {
+            color: var(--text-soft);
+            font-size: 0.98rem;
+            line-height: 1.6;
+            margin-top: 12px;
+            display: none;
+        }
+
+        #closeModal {
+            margin-top: 24px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #a23865, #d05d8f);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.96rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 0 14px 24px rgba(162, 56, 101, 0.24);
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        #closeModal:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.04);
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(26px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes floatBlob {
+            0%, 100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(24px, 30px, 0) scale(1.05);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow:
+                    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+                    0 12px 24px rgba(128, 34, 84, 0.22);
+            }
+            50% {
+                box-shadow:
+                    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+                    0 18px 34px rgba(128, 34, 84, 0.28);
+            }
+        }
+
+        @keyframes driftUp {
+            from {
+                transform: translate3d(0, 0, 0) scale(0.9);
+                opacity: 0;
+            }
+            15% {
+                opacity: 0.85;
+            }
+            to {
+                transform: translate3d(24px, -120vh, 0) scale(1.15);
+                opacity: 0;
+            }
+        }
+
+        @keyframes tick {
+            0%, 100% {
+                transform: translateX(-50%) rotate(0deg);
+            }
+            50% {
+                transform: translateX(-50%) rotate(4deg);
+            }
+        }
+
+        @media (max-width: 860px) {
+            body {
+                overflow-y: auto;
+            }
+
+            .scene {
+                padding: 18px 14px 28px;
+            }
+
+            .shell {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .hero,
+            .wheel-panel {
+                padding: 26px 20px;
+            }
+
+            .lead {
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .wheel-container {
+                width: min(calc(100% - 8px), 500px);
+            }
+
+            #spinBtn {
+                width: 90px;
+                height: 90px;
+                font-size: 0.92rem;
+            }
+
+            #modalResult {
+                font-size: 1.45rem;
+            }
+
+            .status-card {
+                align-items: flex-start;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="scene">
+        <div class="hearts" aria-hidden="true">
+            <span class="heart" style="left: 8%; animation-duration: 15s; animation-delay: -1s;">&hearts;</span>
+            <span class="heart" style="left: 22%; animation-duration: 17s; animation-delay: -6s;">&hearts;</span>
+            <span class="heart" style="left: 37%; animation-duration: 14s; animation-delay: -9s;">&hearts;</span>
+            <span class="heart" style="left: 58%; animation-duration: 18s; animation-delay: -2s;">&hearts;</span>
+            <span class="heart" style="left: 76%; animation-duration: 16s; animation-delay: -11s;">&hearts;</span>
+            <span class="heart" style="left: 90%; animation-duration: 19s; animation-delay: -4s;">&hearts;</span>
+        </div>
+
+        <section class="shell">
+            <div class="hero">
+                <div class="eyebrow">Love wheel special</div>
+                <h1 class="title">For You, Love<span>Spin for something sweet</span></h1>
+                <p class="lead">
+                    A softer, prettier version of your love wheel with dreamy gradients, a cozy glass card,
+                    and gentle motion so every spin feels a little more kilig.
+                </p>
+                <div class="chips">
+                    <div class="chip">Romantic vibe</div>
+                    <div class="chip">One spin a day</div>
+                    <div class="chip">Sweet surprises</div>
+                </div>
+            </div>
+
+            <div class="wheel-panel" id="wheelPanel">
+                <div class="wheel-head">
+                    <h2>Pick today&apos;s lambing</h2>
+                    <p>Tap the center button and let the wheel choose a romantic mission for the day.</p>
+                </div>
+
+                <div class="wheel-container">
+                    <div class="wheel-ring"></div>
+                    <div class="pointer"></div>
+                    <div class="canvas-wrap">
+                        <canvas id="wheelCanvas" width="1000" height="1000"></canvas>
+                    </div>
+                    <button id="spinBtn" type="button">SPIN</button>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-copy">
+                        <strong id="statusTitle">Ready for today&apos;s spin</strong>
+                        <span id="statusText">The wheel is waiting for your next sweet little moment.</span>
+                    </div>
+                    <div class="status-dot" aria-hidden="true"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <span class="modal-kicker">Tonight&apos;s pick</span>
+            <h2 id="modalResult"></h2>
+            <p id="modalNote" class="note"></p>
+            <button id="closeModal" type="button">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("wheelCanvas");
+        const ctx = canvas.getContext("2d");
+        const spinBtn = document.getElementById("spinBtn");
+        const wheelPanel = document.getElementById("wheelPanel");
+        const statusTitle = document.getElementById("statusTitle");
+        const statusText = document.getElementById("statusText");
+        const modal = document.getElementById("modal");
+        const modalResult = document.getElementById("modalResult");
+        const modalNote = document.getElementById("modalNote");
+        const closeModalBtn = document.getElementById("closeModal");
+        const maxSpins = 5;
+
+        const items = [
+            "You must ask me 1 deep question",
+            "What scares you in our relationship?",
+            "One thing you appreciate about me",
+            "Send me your current selfie (no filter 😆)",
+            "Describe us using Emoji",
+            "🎁 Jackpot: I'll do anything you want (wholesome 😆)",
+            "Make a title for our love story",
+            "send voice message na pa Baby",
+            "Ano yung ideal relationship mo?",
+            "Ano yung gusto mong mas ginagawa ko para sayo?",
+            "Sa tingin mo, ano yung kailangan pa nating i-improve?",
+            "Sa tingin mo, ano yung weakness mo sa relationship?"
+        ];
+
+        const sliceGradients = [
+            ["#ffcadc", "#ff91b4"],
+            ["#ffd9c8", "#ffc0b8"],
+            ["#f8d8f3", "#e7b7db"],
+            ["#ffe6f0", "#ffc7db"],
+            ["#ffd7a8", "#ffb7b2"],
+            ["#ffd5e4", "#f3aed2"]
+        ];
+
+        const numSlices = items.length;
+        const sliceAngle = (2 * Math.PI) / numSlices;
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        function getSpinCount() {
+            const saved = Number(localStorage.getItem("spinCount") || "0");
+            return Number.isFinite(saved) ? saved : 0;
+        }
+
+        function getRemainingSpins() {
+            return Math.max(0, maxSpins - getSpinCount());
+        }
+
+        function drawWheel() {
+            const radius = canvas.width / 2;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numSlices; i++) {
+                const startAngle = i * sliceAngle - Math.PI / 2 - sliceAngle / 2;
+                const endAngle = startAngle + sliceAngle;
+                const [startColor, endColor] = sliceGradients[i % sliceGradients.length];
+
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, startColor);
+                gradient.addColorStop(1, endColor);
+
+                ctx.beginPath();
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(radius, radius);
+                const textAngle = startAngle + sliceAngle / 2;
+                ctx.rotate(textAngle);
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#57283c";
+                ctx.font = "bold 22px 'Trebuchet MS', sans-serif";
+                wrapText(items[i], radius - 72, 0, 240, 24);
+                ctx.restore();
+            }
+
+            ctx.beginPath();
+            ctx.arc(radius, radius, 82, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.82)";
+            ctx.fill();
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.stroke();
+        }
+
+        function wrapText(text, x, y, maxWidth, lineHeight) {
+            const words = text.split(" ");
+            let line = "";
+            const lines = [];
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i] + " ";
+                const testWidth = ctx.measureText(testLine).width;
+
+                if (testWidth > maxWidth && i > 0) {
+                    lines.push(line.trim());
+                    line = words[i] + " ";
+                } else {
+                    line = testLine;
+                }
+            }
+
+            lines.push(line.trim());
+
+            const offsetY = ((lines.length - 1) * lineHeight) / 2;
+            lines.forEach((entry, index) => {
+                ctx.fillText(entry, x, y - offsetY + (index * lineHeight));
+            });
+        }
+
+        function updateStatus(title, text) {
+            statusTitle.textContent = title;
+            statusText.textContent = text;
+        }
+
+        function showModal(resultText, isNewResult) {
+            modalResult.textContent = resultText;
+
+            if (isNewResult && resultText.includes("(optional)")) {
+                modalNote.textContent = "No pressure, love. Optional lang talaga ito.";
+                modalNote.style.display = "block";
+            } else if (isNewResult) {
+                modalNote.textContent = "A little romantic assignment just landed for today.";
+                modalNote.style.display = "block";
+            } else {
+                modalNote.style.display = "none";
+            }
+
+            modal.classList.add("show");
+            modal.setAttribute("aria-hidden", "false");
+        }
+
+        function finishSpin(result) {
+            isSpinning = false;
+            spinBtn.disabled = false;
+            spinBtn.textContent = "SPIN";
+            wheelPanel.classList.remove("spinning");
+            const spinCount = getSpinCount() + 1;
+            localStorage.setItem("spinCount", String(spinCount));
+            const remaining = Math.max(0, maxSpins - spinCount);
+
+            if (remaining === 0) {
+                spinBtn.disabled = true;
+                updateStatus("No spins left", "You reached the 5-spin limit.");
+            } else {
+                updateStatus("Spin used", `${remaining} spin${remaining === 1 ? "" : "s"} left.`);
+            }
+
+            showModal(result, true);
+        }
+
+        function initializeSpinState() {
+            const remaining = getRemainingSpins();
+            if (remaining === 0) {
+                spinBtn.disabled = true;
+                updateStatus("No spins left", "You reached the 5-spin limit.");
+            } else {
+                updateStatus("Ready to spin", `${remaining} spin${remaining === 1 ? "" : "s"} available.`);
+            }
+        }
+
+        spinBtn.addEventListener("click", () => {
+            if (isSpinning) {
+                return;
+            }
+
+            const remainingBeforeSpin = getRemainingSpins();
+            if (remainingBeforeSpin <= 0) {
+                updateStatus("No spins left", "You reached the 5-spin limit.");
+                showModal("You already used all 5 spins.", false);
+                return;
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = "WAIT";
+            wheelPanel.classList.add("spinning");
+            updateStatus("Spinning now...", "The wheel is picking your sweet mission for today.");
+
+            const targetSlice = Math.floor(Math.random() * numSlices);
+            const sliceDegree = 360 / numSlices;
+            const targetRotation = (numSlices - targetSlice) * sliceDegree;
+            const wobble = Math.floor(Math.random() * 18) - 9;
+            const finalRotation = targetRotation + wobble;
+            const spins = (Math.floor(Math.random() * 4) + 6) * 360;
+            const currentNormalized = currentRotation % 360;
+            const additionalDegrees = spins + finalRotation - currentNormalized;
+
+            currentRotation += additionalDegrees;
+            canvas.style.transition = "transform 4.8s cubic-bezier(0.16, 1, 0.3, 1)";
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            window.setTimeout(() => {
+                finishSpin(items[targetSlice]);
+            }, 4800);
+        });
+
+        closeModalBtn.addEventListener("click", () => {
+            modal.classList.remove("show");
+            modal.setAttribute("aria-hidden", "true");
+        });
+
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.classList.remove("show");
+                modal.setAttribute("aria-hidden", "true");
+            }
+        });
+
+        drawWheel();
+        initializeSpinState();
+    </script>
+</body>
+</html>
